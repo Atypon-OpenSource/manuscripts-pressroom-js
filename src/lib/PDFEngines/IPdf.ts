@@ -15,14 +15,11 @@
  */
 
 import { ContainedModel } from '@manuscripts/transform'
+import express from 'express'
 
 import { AttachmentData } from '../attachments'
-import { SampleEngine } from './SampleEngine'
 
-export const PdfEngines = new Map()
-PdfEngines.set('SampleEngine', new SampleEngine())
-
-export interface IPdf {
+export interface ISyncPdf {
   engineName: string
 
   createJob(
@@ -42,3 +39,27 @@ export interface IPdf {
 
   jobResult(job_id: string): Promise<Buffer | null>
 }
+
+export interface IAsyncPdf {
+  engineName: string
+
+  createPdf(
+    _dir: string,
+    _data: Array<ContainedModel>,
+    _manuscriptID: string,
+    _imageDir: string,
+    _attachments: Array<AttachmentData>,
+    _res: express.Response,
+    _theme?: string,
+    _articleOptions?: {
+      allowMissingElements: boolean
+      generateSectionLabels: boolean
+    }
+  ): void
+}
+
+export type SyncEnginesType = 'SampleEngine' | 'DummyEngine'
+export type AsyncEnginesType = 'prince-html'
+
+export const AsyncEngines: AsyncEnginesType[] = ['prince-html']
+export const SyncEngines: SyncEnginesType[] = ['SampleEngine', 'DummyEngine']

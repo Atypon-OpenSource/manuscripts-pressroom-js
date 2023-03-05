@@ -19,16 +19,24 @@ import fs from 'fs-extra'
 
 import { AttachmentData } from '../lib/attachments'
 import { authentication } from '../lib/authentication'
-import { PDFJobCreationError, PDFPreviewError } from '../lib/errors'
 import { logger } from '../lib/logger'
 import { chooseManuscriptID } from '../lib/manuscript-id'
 import { parseBodyProperty } from '../lib/parseBodyParams'
-import { IPdf, PdfEngines } from '../lib/PDFEngines/IPdf'
-import { createPrincePDF } from '../lib/prince-html'
+import { ASyncPdfEnginesFactory } from '../lib/PDFEngines/AsyncPdfEnginesFactory'
+import {
+  AsyncEngines,
+  AsyncEnginesType,
+  ISyncPdf,
+  IAsyncPdf,
+  SyncEngines,
+  SyncEnginesType,
+} from '../lib/PDFEngines/IPdf'
+import { SyncPdfEnginesFactory } from '../lib/PDFEngines/SyncPdfEnginesFactory'
 import { createRequestDirectory } from '../lib/temp-dir'
 import { upload } from '../lib/upload'
 import { decompressManuscript } from '../lib/validate-manuscript-archive'
 import { wrapAsync } from '../lib/wrap-async'
+
 /**
  * @swagger
  *
@@ -92,7 +100,7 @@ export const exportPDF = Router().post(
       manuscriptID: Joi.string().required(),
       engine: Joi.string()
         .empty('')
-        .allow('prince-html', 'SampleEngine')
+        .allow(...AsyncEngines, ...SyncEngines)
         .default('xelatex'),
       theme: Joi.string().empty(''),
       allowMissingElements: Joi.boolean().empty('').default(false),
@@ -118,7 +126,7 @@ export const exportPDF = Router().post(
       attachments,
     } = req.body as {
       manuscriptID: string
-      engine: 'SampleEngine' | 'prince-html'
+      engine: SyncEnginesType | AsyncEnginesType
       theme?: string
       allowMissingElements: boolean
       generateSectionLabels: boolean
@@ -130,49 +138,43 @@ export const exportPDF = Router().post(
 
     // read the data
     const { data } = await fs.readJSON(dir + '/index.manuscript-json')
+    try {
+      if (SyncEngines.includes(engine as SyncEnginesType)) {
+        const currentEngine: ISyncPdf =
+          SyncPdfEnginesFactory.createPdfEngine(engine as SyncEnginesType)
+        await currentEngine.createJob(
+          dir,
+          data,
+          manuscriptID,
+          'Data',
+          attachments,
+          theme,
+          {
+            allowMissingElements,
+            generateSectionLabels,
+          }
+        )
+      } else if (AsyncEngines.includes(engine as AsyncEnginesType)){
+        const currentEngine: IAsyncPdf =
+          ASyncPdfEnginesFactory.createPdfEngine(engine as AsyncEnginesType)
+        currentEngine.createPdf(
+          dir,
+          data,
+          manuscriptID,
+          'Data',
+          attachments,
+          res,
+          theme,
+          {
+            allowMissingElements,
+            generateSectionLabels
+          }
+        )
 
-    if (engine === 'prince-html') {
-      try {
-        await createPrincePDF(
-          dir,
-          data,
-          manuscriptID,
-          'Data',
-          attachments,
-          theme,
-          {
-            allowMissingElements,
-            generateSectionLabels,
-          }
-        )
-      } catch (e) {
-        logger.error(e)
-        throw new PDFPreviewError('Conversion failed when exporting to PDF')
       }
-      // send the file as an attachment
-      res.download(dir + '/manuscript.pdf')
-    } else if (PdfEngines.has(engine)) {
-      const currentEngine: IPdf = PdfEngines.get(engine)
-      try {
-        const id = await currentEngine.createJob(
-          dir,
-          data,
-          manuscriptID,
-          'Data',
-          attachments,
-          theme,
-          {
-            allowMissingElements,
-            generateSectionLabels,
-          }
-        )
-        res.status(201).send({ id: id })
-      } catch (e) {
-        logger.error(e)
-        throw new PDFJobCreationError('Job creation failed')
-      }
-    } else {
-      throw Error('Engine not supported.')
+      
+    } catch (e) {
+      logger.error(e)
     }
   })
 )

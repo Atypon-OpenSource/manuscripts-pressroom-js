@@ -29,6 +29,7 @@ WORKDIR /usr/src/app
 COPY . .
 RUN yarn install --frozen-lockfile --non-interactive
 RUN yarn build
+RUN yarn test
 
 RUN yarn install --production
 

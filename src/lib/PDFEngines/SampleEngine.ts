@@ -18,17 +18,27 @@
 import {ContainedModel} from '@manuscripts/transform'
 
 import {AttachmentData} from '../attachments'
-import {IPdf} from "./IPdf";
+import {ISyncPdf} from "./IPdf";
 
-export class SampleEngine implements IPdf {
+export class SampleEngine implements ISyncPdf {
 
   public get engineName(): string {
     return 'SampleEngine'
   }
 
-  public async createJob(dir: string, _data: Array<ContainedModel>, _manuscriptID: string, _imageDir: string, _attachments: Array<AttachmentData>, _theme?: string, _articleOptions?: { allowMissingElements: boolean; generateSectionLabels: boolean }): Promise<string> {
+  public async createJob(
+    dir: string,
+    _data: Array<ContainedModel>,
+    _manuscriptID: string,
+    _imageDir: string,
+    _attachments: Array<AttachmentData>,
+    _theme?: string,
+    _articleOptions?: {
+      allowMissingElements: boolean
+      generateSectionLabels: boolean
+    }
+  ): Promise<string> {
     const id = '123123'
-
     return `${id}:${this.engineName}`
   }
 
