@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { ContainedModel } from '@manuscripts/transform/dist/types/transformer/models'
-import { dir } from 'console'
+import { ContainedModel } from '@manuscripts/transform'
 import express from 'express'
 
 import { AttachmentData } from '../attachments'
@@ -48,7 +47,7 @@ export class PrinceHtmlEngine implements IAsyncPdf {
         _theme,
         _articleOptions
       )
-      _res.download(dir + '/manuscript.pdf')
+      _res.download(_dir + '/manuscript.pdf')
     } catch (e) {
       throw new PDFPreviewError('Conversion failed when exporting to PDF')
     }

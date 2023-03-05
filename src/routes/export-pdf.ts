@@ -26,8 +26,8 @@ import { ASyncPdfEnginesFactory } from '../lib/PDFEngines/AsyncPdfEnginesFactory
 import {
   AsyncEngines,
   AsyncEnginesType,
-  ISyncPdf,
   IAsyncPdf,
+  ISyncPdf,
   SyncEngines,
   SyncEnginesType,
 } from '../lib/PDFEngines/IPdf'
@@ -140,8 +140,9 @@ export const exportPDF = Router().post(
     const { data } = await fs.readJSON(dir + '/index.manuscript-json')
     try {
       if (SyncEngines.includes(engine as SyncEnginesType)) {
-        const currentEngine: ISyncPdf =
-          SyncPdfEnginesFactory.createPdfEngine(engine as SyncEnginesType)
+        const currentEngine: ISyncPdf = SyncPdfEnginesFactory.createPdfEngine(
+          engine as SyncEnginesType
+        )
         await currentEngine.createJob(
           dir,
           data,
@@ -154,9 +155,10 @@ export const exportPDF = Router().post(
             generateSectionLabels,
           }
         )
-      } else if (AsyncEngines.includes(engine as AsyncEnginesType)){
-        const currentEngine: IAsyncPdf =
-          ASyncPdfEnginesFactory.createPdfEngine(engine as AsyncEnginesType)
+      } else if (AsyncEngines.includes(engine as AsyncEnginesType)) {
+        const currentEngine: IAsyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
+          engine as AsyncEnginesType
+        )
         currentEngine.createPdf(
           dir,
           data,
@@ -167,12 +169,10 @@ export const exportPDF = Router().post(
           theme,
           {
             allowMissingElements,
-            generateSectionLabels
+            generateSectionLabels,
           }
         )
-
       }
-      
     } catch (e) {
       logger.error(e)
     }
