@@ -19,6 +19,7 @@ import {ContainedModel} from '@manuscripts/transform'
 import fs from 'fs-extra'
 
 import {AttachmentData} from '../attachments'
+import { PDFJobCreationError } from '../errors';
 import {ISyncPdf} from "./IPdf";
 
 export class DummyEngine implements ISyncPdf {
@@ -29,8 +30,13 @@ export class DummyEngine implements ISyncPdf {
   }
 
   public async createJob(dir: string, _data: Array<ContainedModel>, _manuscriptID: string, _imageDir: string, _attachments: Array<AttachmentData>, _theme?: string, _articleOptions?: { allowMissingElements: boolean; generateSectionLabels: boolean }): Promise<string> {
-    const id = '987987'
-    return `${id}:${this.engineName}`
+    try {
+      const id = '987987'
+      return `${id}:${this.engineName}`
+    } catch (error) {
+      throw new PDFJobCreationError('Job creation failed')
+    }
+   
   }
 
   public async jobResult(job_id: string): Promise<Buffer | null> {

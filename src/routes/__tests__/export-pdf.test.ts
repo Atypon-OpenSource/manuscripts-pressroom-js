@@ -17,6 +17,7 @@ import { NextFunction, Request, Response } from 'express'
 import request from 'supertest'
 
 import { config } from '../../lib/config'
+import { logger } from '../../lib/logger'
 
 jest.setTimeout(30000)
 
@@ -80,6 +81,7 @@ describe('export PDF', () => {
     })
 
     const { app } = await import('../../app')
+    logger.info('test starting ...')
 
     const response = await request(app)
       .post('/api/v2/export/pdf')
@@ -93,6 +95,7 @@ describe('export PDF', () => {
       .set('pressroom-api-key', config.api_key)
 
     expect(response.status).toBe(500)
+    logger.log(JSON.parse(response.body.error).internalErrorCode)
     expect(JSON.parse(response.body.error).internalErrorCode).toBe(
       'PREVIEW_PDF_GENERATION_FAILED'
     )

@@ -19,6 +19,7 @@ import express from 'express'
 
 import { AttachmentData } from '../attachments'
 import { PDFPreviewError } from '../errors'
+import { logger } from '../logger'
 import { createPrincePDF } from '../prince-html'
 import { IAsyncPdf } from './IPdf'
 
@@ -47,9 +48,10 @@ export class PrinceHtmlEngine implements IAsyncPdf {
         _theme,
         _articleOptions
       )
-      _res.download(_dir + '/manuscript.pdf')
     } catch (e) {
+      logger.error(e)
       throw new PDFPreviewError('Conversion failed when exporting to PDF')
     }
+    _res.download(_dir + '/manuscript.pdf')
   }
 }

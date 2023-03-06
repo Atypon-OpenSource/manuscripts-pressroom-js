@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {ContainedModel} from '@manuscripts/transform'
+import { ContainedModel } from '@manuscripts/transform'
 
-import {AttachmentData} from '../attachments'
-import {ISyncPdf} from "./IPdf";
+import { AttachmentData } from '../attachments'
+import { PDFJobCreationError } from '../errors'
+import { ISyncPdf } from './IPdf'
 
 export class SampleEngine implements ISyncPdf {
-
   public get engineName(): string {
     return 'SampleEngine'
   }
@@ -38,8 +38,13 @@ export class SampleEngine implements ISyncPdf {
       generateSectionLabels: boolean
     }
   ): Promise<string> {
-    const id = '123123'
-    return `${id}:${this.engineName}`
+    try {
+      const id = '123123'
+      return `${id}:${this.engineName}`
+    } catch (error) {
+      throw new PDFJobCreationError('Job creation failed')
+    }
+  
   }
 
   public async jobResult(job_id: string): Promise<Buffer | null> {
@@ -47,7 +52,6 @@ export class SampleEngine implements ISyncPdf {
   }
 
   public async jobStatus(job_id: string): Promise<string> {
-
     return 'pending'
   }
 }

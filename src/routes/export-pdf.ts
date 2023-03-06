@@ -135,11 +135,11 @@ export const exportPDF = Router().post(
 
     // unzip the input
     const dir = req.tempDir
-
     // read the data
     const { data } = await fs.readJSON(dir + '/index.manuscript-json')
-    try {
-      if (SyncEngines.includes(engine as SyncEnginesType)) {
+
+    if (SyncEngines.includes(engine as SyncEnginesType)) {
+      try {
         const currentEngine: ISyncPdf = SyncPdfEnginesFactory.createPdfEngine(
           engine as SyncEnginesType
         )
@@ -155,26 +155,26 @@ export const exportPDF = Router().post(
             generateSectionLabels,
           }
         )
-      } else if (AsyncEngines.includes(engine as AsyncEnginesType)) {
-        const currentEngine: IAsyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
-          engine as AsyncEnginesType
-        )
-        currentEngine.createPdf(
-          dir,
-          data,
-          manuscriptID,
-          'Data',
-          attachments,
-          res,
-          theme,
-          {
-            allowMissingElements,
-            generateSectionLabels,
-          }
-        )
+      } catch (error) {
+        logger.error(error)
       }
-    } catch (e) {
-      logger.error(e)
+    } else if (AsyncEngines.includes(engine as AsyncEnginesType)) {
+      const currentEngine: IAsyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
+        engine as AsyncEnginesType
+      )
+      currentEngine.createPdf(
+        dir,
+        data,
+        manuscriptID,
+        'Data',
+        attachments,
+        res,
+        theme,
+        {
+          allowMissingElements,
+          generateSectionLabels,
+        }
+      )
     }
   })
 )

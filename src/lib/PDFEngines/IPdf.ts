@@ -55,7 +55,7 @@ export interface IAsyncPdf {
       allowMissingElements: boolean
       generateSectionLabels: boolean
     }
-  ): void
+  ): Promise<void>
 }
 
 export type SyncEnginesType = 'SampleEngine' | 'DummyEngine'

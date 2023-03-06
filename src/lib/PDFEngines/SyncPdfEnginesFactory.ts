@@ -18,17 +18,15 @@ import { ISyncPdf, SyncEnginesType } from './IPdf'
 import { SampleEngine } from './SampleEngine'
 
 export class SyncPdfEnginesFactory {
-
   private static instances: Record<SyncEnginesType, ISyncPdf> = {
     DummyEngine: new DummyPdfEngine(),
     SampleEngine: new SampleEngine(),
-  };
-  static createPdfEngine(engine: SyncEnginesType): ISyncPdf {
-    const instance = SyncPdfEnginesFactory.instances[engine];
-    if (!instance) {
-      throw new Error('Sync engine not supported.');
-    }
-    return instance;
   }
-  
+  static createPdfEngine(engine: SyncEnginesType): ISyncPdf {
+    const instance = SyncPdfEnginesFactory.instances[engine]
+    if (!instance) {
+      throw new Error('Sync engine not supported.')
+    }
+    return instance
+  }
 }
