@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 import { celebrate, Joi } from 'celebrate'
-import { Router } from 'express'
+import e, { Router } from 'express'
 import fs from 'fs-extra'
 
 import { AttachmentData } from '../lib/attachments'
 import { authentication } from '../lib/authentication'
+import { PDFPreviewError } from '../lib/errors'
 import { logger } from '../lib/logger'
 import { chooseManuscriptID } from '../lib/manuscript-id'
 import { parseBodyProperty } from '../lib/parseBodyParams'
 import { ASyncPdfEnginesFactory } from '../lib/PDFEngines/AsyncPdfEnginesFactory'
 import {
-  AsyncEngines,
-  AsyncEnginesType,
-  IAsyncPdf,
+  asyncEngines,
+  ASyncEnginesType,
+  IASyncPdf,
+} from '../lib/PDFEngines/IASyncPdf'
+import {
   ISyncPdf,
-  SyncEngines,
+  syncEngines,
   SyncEnginesType,
-} from '../lib/PDFEngines/IPdf'
+} from '../lib/PDFEngines/ISyncPdf'
 import { SyncPdfEnginesFactory } from '../lib/PDFEngines/SyncPdfEnginesFactory'
 import { createRequestDirectory } from '../lib/temp-dir'
 import { upload } from '../lib/upload'
@@ -100,7 +103,7 @@ export const exportPDF = Router().post(
       manuscriptID: Joi.string().required(),
       engine: Joi.string()
         .empty('')
-        .allow(...AsyncEngines, ...SyncEngines)
+        .allow(...asyncEngines, ...syncEngines)
         .default('xelatex'),
       theme: Joi.string().empty(''),
       allowMissingElements: Joi.boolean().empty('').default(false),
@@ -126,7 +129,7 @@ export const exportPDF = Router().post(
       attachments,
     } = req.body as {
       manuscriptID: string
-      engine: SyncEnginesType | AsyncEnginesType
+      engine: SyncEnginesType | ASyncEnginesType
       theme?: string
       allowMissingElements: boolean
       generateSectionLabels: boolean
@@ -137,13 +140,13 @@ export const exportPDF = Router().post(
     const dir = req.tempDir
     // read the data
     const { data } = await fs.readJSON(dir + '/index.manuscript-json')
-
-    if (SyncEngines.includes(engine as SyncEnginesType)) {
+    //async
+    if (asyncEngines.includes(engine as ASyncEnginesType)) {
       try {
-        const currentEngine: ISyncPdf = SyncPdfEnginesFactory.createPdfEngine(
-          engine as SyncEnginesType
+        const currentEngine: IASyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
+          engine as ASyncEnginesType
         )
-        await currentEngine.createJob(
+        const id = await currentEngine.createJob(
           dir,
           data,
           manuscriptID,
@@ -155,26 +158,32 @@ export const exportPDF = Router().post(
             generateSectionLabels,
           }
         )
+        res.status(201).send({ id: id })
       } catch (error) {
         logger.error(error)
       }
-    } else if (AsyncEngines.includes(engine as AsyncEnginesType)) {
-      const currentEngine: IAsyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
-        engine as AsyncEnginesType
+    } else if (syncEngines.includes(engine as SyncEnginesType)) {
+      const currentEngine: ISyncPdf = SyncPdfEnginesFactory.createPdfEngine(
+        engine as SyncEnginesType
       )
-      currentEngine.createPdf(
-        dir,
-        data,
-        manuscriptID,
-        'Data',
-        attachments,
-        res,
-        theme,
-        {
-          allowMissingElements,
-          generateSectionLabels,
-        }
-      )
+      try {
+        await currentEngine.createPdf(
+          dir,
+          data,
+          manuscriptID,
+          'Data',
+          attachments,
+          res,
+          theme,
+          {
+            allowMissingElements,
+            generateSectionLabels,
+          }
+        )
+      } catch (error) {
+        logger.error(e)
+        throw new PDFPreviewError('Conversion failed when exporting to PDF')
+      }
     }
   })
 )

@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AsyncEnginesType, IAsyncPdf } from './IPdf'
-import { PrinceHtmlEngine } from './PrinceHtmlEngine'
+import { DummyPdfEngine } from './DummyPdfEngine'
+import { ASyncEnginesType, IASyncPdf } from './IASyncPdf'
+import { SampleEngine } from './SampleEngine'
 
 export class ASyncPdfEnginesFactory {
-  private static instances: Record<AsyncEnginesType, IAsyncPdf> = {
-    'prince-html': new PrinceHtmlEngine(),
+  private static instances: Record<ASyncEnginesType, IASyncPdf> = {
+    DummyEngine: new DummyPdfEngine(),
+    SampleEngine: new SampleEngine(),
   }
-
-  static createPdfEngine(engine: AsyncEnginesType): IAsyncPdf {
+  static createPdfEngine(engine: ASyncEnginesType): IASyncPdf {
     const instance = ASyncPdfEnginesFactory.instances[engine]
     if (!instance) {
-      throw new Error('Async engine not supported.')
+      throw new Error('Sync engine not supported.')
     }
     return instance
   }

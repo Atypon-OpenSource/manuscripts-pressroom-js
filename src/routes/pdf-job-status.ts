@@ -17,9 +17,13 @@ import { celebrate, Joi } from 'celebrate'
 import { Router } from 'express'
 
 import { authentication } from '../lib/authentication'
-import { ISyncPdf, SyncEngines, SyncEnginesType } from '../lib/PDFEngines/IPdf'
+import { ASyncPdfEnginesFactory } from '../lib/PDFEngines/AsyncPdfEnginesFactory'
+import {
+  asyncEngines,
+  ASyncEnginesType,
+  IASyncPdf,
+} from '../lib/PDFEngines/IASyncPdf'
 import { splitEngineId } from '../lib/PDFEngines/PdfUtils'
-import { SyncPdfEnginesFactory } from '../lib/PDFEngines/SyncPdfEnginesFactory'
 import { wrapAsync } from '../lib/wrap-async'
 
 /**
@@ -49,8 +53,10 @@ export const pdfJobStatus = Router().get(
     const { submission_id } = req.params
     const { id, engine } = splitEngineId(submission_id)
 
-    if (SyncEngines.includes(engine as SyncEnginesType)) {
-      const currentEngine: ISyncPdf = SyncPdfEnginesFactory.createPdfEngine(engine as SyncEnginesType)
+    if (asyncEngines.includes(engine as ASyncEnginesType)) {
+      const currentEngine: IASyncPdf = ASyncPdfEnginesFactory.createPdfEngine(
+        engine as ASyncEnginesType
+      )
       const status = await currentEngine.jobStatus(id)
       res.status(200).send({ status: status })
     } else {

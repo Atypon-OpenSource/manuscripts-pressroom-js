@@ -22,27 +22,6 @@ import { AttachmentData } from '../attachments'
 export interface ISyncPdf {
   engineName: string
 
-  createJob(
-    dir: string,
-    _data: Array<ContainedModel>,
-    _manuscriptID: string,
-    _imageDir: string,
-    _attachments: Array<AttachmentData>,
-    _theme?: string,
-    _articleOptions?: {
-      allowMissingElements: boolean
-      generateSectionLabels: boolean
-    }
-  ): Promise<string>
-
-  jobStatus(job_id: string): Promise<string>
-
-  jobResult(job_id: string): Promise<Buffer | null>
-}
-
-export interface IAsyncPdf {
-  engineName: string
-
   createPdf(
     _dir: string,
     _data: Array<ContainedModel>,
@@ -58,8 +37,6 @@ export interface IAsyncPdf {
   ): Promise<void>
 }
 
-export type SyncEnginesType = 'SampleEngine' | 'DummyEngine'
-export type AsyncEnginesType = 'prince-html'
+export type SyncEnginesType = 'prince-html'
 
-export const AsyncEngines: AsyncEnginesType[] = ['prince-html']
-export const SyncEngines: SyncEnginesType[] = ['SampleEngine', 'DummyEngine']
+export const syncEngines: SyncEnginesType[] = ['prince-html']

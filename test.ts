@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ISyncPdf, SyncEnginesType } from './ISyncPdf'
-import { PrinceHtmlEngine } from './PrinceHtmlEngine'
+import  jwt from'jsonwebtoken';
 
-export class SyncPdfEnginesFactory {
-  private static instances: Record<SyncEnginesType, ISyncPdf> = {
-    'prince-html': new PrinceHtmlEngine(),
-  }
+import {config} from './src/lib/config';
 
-  static createPdfEngine(engine: SyncEnginesType): ISyncPdf {
-    const instance = SyncPdfEnginesFactory.instances[engine]
-    if (!instance) {
-      throw new Error('Async engine not supported.')
-    }
-    return instance
-  }
-}
+// Set the payload for the JWT token
+const payload = { email: 'test@atypon.com' };
+
+// Sign the JWT token with the secret key
+export const token = jwt.sign(payload, config.api_key);

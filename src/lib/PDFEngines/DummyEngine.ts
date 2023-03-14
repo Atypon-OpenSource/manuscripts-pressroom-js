@@ -15,34 +15,43 @@
  * limitations under the License.
  */
 
-import {ContainedModel} from '@manuscripts/transform'
+import { ContainedModel } from '@manuscripts/transform'
 import fs from 'fs-extra'
 
-import {AttachmentData} from '../attachments'
-import { PDFJobCreationError } from '../errors';
-import {ISyncPdf} from "./IPdf";
+import { AttachmentData } from '../attachments'
+import express from 'express'
 
-export class DummyEngine implements ISyncPdf {
+import { PDFJobCreationError } from '../errors'
+import {IASyncPdf} from "./IASyncPdf";
 
-
+export class DummyEngine implements IASyncPdf {
   public get engineName(): string {
     return 'DummyEngine'
   }
 
-  public async createJob(dir: string, _data: Array<ContainedModel>, _manuscriptID: string, _imageDir: string, _attachments: Array<AttachmentData>, _theme?: string, _articleOptions?: { allowMissingElements: boolean; generateSectionLabels: boolean }): Promise<string> {
+  public async createJob(
+    dir: string,
+    _data: Array<ContainedModel>,
+    _manuscriptID: string,
+    _imageDir: string,
+    _attachments: Array<AttachmentData>,
+    _theme?: string,
+    _articleOptions?: {
+      allowMissingElements: boolean
+      generateSectionLabels: boolean
+    },
+    _res?: express.Response
+  ): Promise<string> {
     try {
       const id = '987987'
       return `${id}:${this.engineName}`
     } catch (error) {
       throw new PDFJobCreationError('Job creation failed')
     }
-   
   }
 
   public async jobResult(job_id: string): Promise<Buffer | null> {
-    return fs.readFileSync(
-        'src/assets/dummy-pdf/pressroom-pdf-sample.pdf'
-    )
+    return fs.readFileSync('src/assets/dummy-pdf/pressroom-pdf-sample.pdf')
   }
 
   public async jobStatus(job_id: string): Promise<string> {

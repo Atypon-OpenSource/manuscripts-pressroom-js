@@ -18,12 +18,10 @@ import { ContainedModel } from '@manuscripts/transform'
 import express from 'express'
 
 import { AttachmentData } from '../attachments'
-import { PDFPreviewError } from '../errors'
-import { logger } from '../logger'
 import { createPrincePDF } from '../prince-html'
-import { IAsyncPdf } from './IPdf'
+import { ISyncPdf } from './ISyncPdf'
 
-export class PrinceHtmlEngine implements IAsyncPdf {
+export class PrinceHtmlEngine implements ISyncPdf {
   engineName: string
   async createPdf(
     _dir: string,
@@ -38,20 +36,15 @@ export class PrinceHtmlEngine implements IAsyncPdf {
       generateSectionLabels: boolean
     }
   ): Promise<void> {
-    try {
-      await createPrincePDF(
-        _dir,
-        _data,
-        _manuscriptID,
-        'Data',
-        _attachments,
-        _theme,
-        _articleOptions
-      )
-    } catch (e) {
-      logger.error(e)
-      throw new PDFPreviewError('Conversion failed when exporting to PDF')
-    }
+    await createPrincePDF(
+      _dir,
+      _data,
+      _manuscriptID,
+      'Data',
+      _attachments,
+      _theme,
+      _articleOptions
+    )
     _res.download(_dir + '/manuscript.pdf')
   }
 }

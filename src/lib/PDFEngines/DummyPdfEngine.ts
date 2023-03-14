@@ -18,11 +18,11 @@
 import {ContainedModel} from '@manuscripts/transform'
 
 import {AttachmentData} from '../attachments'
-import {ISyncPdf} from "./IPdf";
 import fs from "fs-extra";
 import { PDFJobCreationError } from "../errors";
+import {IASyncPdf} from "./IASyncPdf";
 
-export class DummyPdfEngine implements ISyncPdf {
+export class DummyPdfEngine implements IASyncPdf {
 
   _pdfFile: Buffer
 

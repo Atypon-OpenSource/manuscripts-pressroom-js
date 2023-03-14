@@ -1,6 +1,5 @@
-/* eslint-disable */
 /*!
- * © 2022 Atypon Systems LLC
+ * © 2023 Atypon Systems LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { AttachmentData } from '../attachments'
 import { ContainedModel } from '@manuscripts/transform'
-
 import express from 'express'
 
-import { PDFJobCreationError } from '../errors'
-import {IASyncPdf} from "./IASyncPdf";
+import { AttachmentData } from '../attachments'
 
-export class SampleEngine implements IASyncPdf {
-  public get engineName(): string {
-    return 'SampleEngine'
-  }
+export type ASyncEnginesType = 'SampleEngine' | 'DummyEngine'
+export const asyncEngines: ASyncEnginesType[] = ['SampleEngine', 'DummyEngine']
+export interface IASyncPdf {
+  engineName: string
 
-  public async createJob(
+  createJob(
     dir: string,
     _data: Array<ContainedModel>,
     _manuscriptID: string,
@@ -40,20 +35,9 @@ export class SampleEngine implements IASyncPdf {
       generateSectionLabels: boolean
     },
     _res?: express.Response
-  ): Promise<string> {
-    try {
-      const id = '123123'
-      return `${id}:${this.engineName}`
-    } catch (error) {
-      throw new PDFJobCreationError('Job creation failed')
-    }
-  }
+  ): Promise<string>
 
-  public async jobResult(job_id: string): Promise<Buffer | null> {
-    return null
-  }
+  jobStatus(job_id: string): Promise<string>
 
-  public async jobStatus(job_id: string): Promise<string> {
-    return 'pending'
-  }
+  jobResult(job_id: string): Promise<Buffer | null>
 }
